@@ -1,6 +1,6 @@
 //===========================================================//
 //
-//			Name & Student ID
+//			Borna Ghazizadeh & 401102286
 //
 //			Implemented Instructions are:
 //			R format:  add(u), sub(u), and, or, xor, nor, slt, sltu;
@@ -28,7 +28,7 @@ module single_cycle_mips
  
 	initial begin
 		$display("Single Cycle MIPS Implemention");
-		$display("Name & Student ID");
+		$display("Borna Ghazizadeh & 401102286");
 	end
 
 	reg [31:0] PC;          // Keep PC as it is, its name is used in higher level test bench
@@ -44,9 +44,10 @@ module single_cycle_mips
    // Control Signals
 
    wire PCSrc;
+   reg brn, chk;
+   assign PCSrc = chk & brn;
 
    reg SZEn, ALUSrc, RegDst, MemtoReg, RegWrite, MemWrite;
-
 
    reg [3:0] AluOP;
 
@@ -61,13 +62,185 @@ module single_cycle_mips
       MemtoReg = 1'bx;
       RegWrite = 1'b0;
       MemWrite = 1'b0;
+      brn = 1'b0;        
+      chk = AluZero;
+      //defaults
 
       case(op)
-      
+         6'b000000 : begin //R-format op 6 bits
+            ALUSrc = 1'b0; 
+            RegDst = 1'b1; 
+            MemtoReg = 1'b0;   
+            RegWrite = 1'b1;
+            brn = 1'b0;     
+            chk = AluZero;     
+            MemWrite = 1'b0;
+
+            case(func)//R-format func 6 bits
+					6'b100000 : AluOP = 4'h0 ; //add
+					6'b100010 : AluOP = 4'h1 ; //sub
+					6'b100001 : AluOP = 4'h0 ; //add(u)
+					6'b100011 : AluOP = 4'h1 ; //sub(u)
+					6'b100100 : AluOP = 4'h4 ; //and
+					6'b100101 : AluOP = 4'h5 ; //or
+					6'b100110 : AluOP = 4'h7 ; //xor
+					6'b100111 : AluOP = 4'h6 ; //nor
+					6'b101010 : AluOP = 4'h2 ; //slt
+					6'b101011 : AluOP = 4'h3; //slt(u)
+            endcase
+         end
+
+      //I-format op 6 bits:
+         6'b001000 : begin //addi
+            SZEn = 1'b1;
+            AluOP = 4'h0;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001001 : begin //addi(u)
+            SZEn = 1'b1;
+            AluOP = 4'h0;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001010 : begin //slti
+            SZEn = 1'b1;
+            AluOP = 4'h2;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001011 : begin //slti(u)
+            SZEn = 1'b0;
+            AluOP = 4'h3;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001100 : begin //andi
+            SZEn = 1'b0;
+            AluOP = 4'h4;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001101 : begin //ori
+            SZEn = 1'b0;
+            AluOP = 4'h5;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001110 : begin //xori
+            SZEn = 1'b0;
+            AluOP = 4'h7;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b001111 : begin //lui
+            SZEn = 1'b0;
+            AluOP = 4'h8;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b0;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b000100 : begin //beq
+            SZEn = 1'b1;
+            AluOP = 4'h1;
+
+            ALUSrc = 1'b0;
+            //RegDst = 1'bx;
+            //MemtoReg = 1'bx;
+            RegWrite = 1'b0;
+            brn = 1'b1;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b000101 : begin //bne
+            SZEn = 1'b1;
+            AluOP = 4'h1;
+
+            ALUSrc = 1'b0;
+            //RegDst = 1'bx;
+            //MemtoReg = 1'bx;
+            RegWrite = 1'b0;
+            brn = 1'b1;
+            chk = !AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b100011 : begin //lw
+            SZEn = 1'b1;
+            AluOP = 4'h0;
+
+            ALUSrc = 1'b1;
+            RegDst = 1'b0;
+            MemtoReg = 1'b1;
+            RegWrite = 1'b1;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b0;
+         end
+         6'b101011 : begin //sw
+            SZEn = 1'b1;
+            AluOP = 4'h0;
+
+            ALUSrc = 1'b1;
+            //RegDst = 1'bx;
+            //MemtoReg = 1'bx;
+            RegWrite = 1'b0;
+            brn = 1'b0;
+            chk = AluZero;
+            MemWrite = 1'b1;
+         end
+      endcase
+    
 //      YOU COMPLETE THE REST
 
-
    end
+
 
 
 	// DATA PATH STARTS HERE
@@ -80,7 +253,7 @@ module single_cycle_mips
 
    always @(posedge clk)
       if(reset)
-         PC <= 32'h0
+         PC <= 32'h0;
       else
          PC <= PCSrc ? PCbranch : PCplus4;
 
@@ -180,3 +353,6 @@ module my_alu(
 endmodule
 
 //============================================================================//
+
+
+
